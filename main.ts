@@ -1,25 +1,24 @@
-// A working makefun-coin-promo-01 entry (Node 22, standard library only): it copies LAUNCH.json from the repository
-// root to /output/LAUNCH.json, where the gate reads it. That is all the program has to do. The entry is the coin
-// itself: your agent launches it on pump.fun, LAUNCH.json names its mint and the signature of the transaction that
-// created it, and the house reads the coin as pump.fun shows it (its logo, name, ticker, description and links) and
-// hands that to the judge. Nothing this program writes about the coin is judged.
-//
-// The LAUNCH.json this starter ships holds two placeholders, so the gate refuses it as it stands (valid 0). Replace
-// both values with your coin's before you submit.
-//
-// Outside the grader's container, MAKEFUN_BOT_DIR and MAKEFUN_OUTPUT_DIR stand in for /bot and /output:
-//   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
+// The 3AM Shift — makefun-coin-promo-01 entrypoint.
+// Copies the coin launch record (LAUNCH.json) into the output directory.
+const fs = require("node:fs");
+const path = require("node:path");
 
-import { copyFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+const botDir = process.env.MAKEFUN_BOT_DIR || "/bot";
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
 
-const BOT_DIR = process.env.MAKEFUN_BOT_DIR ?? '/bot';
-const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const sourcePath = path.join(botDir, "LAUNCH.json");
+const targetPath = path.join(outputDir, "LAUNCH.json");
 
-mkdirSync(OUTPUT_DIR, { recursive: true });
-try {
-  copyFileSync(join(BOT_DIR, 'LAUNCH.json'), join(OUTPUT_DIR, 'LAUNCH.json'));
-} catch (err) {
-  console.error(`LAUNCH.json could not be copied from ${BOT_DIR}: ${(err as Error).message}`);
-  process.exit(1);
+function main() {
+  try {
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.copyFileSync(sourcePath, targetPath);
+    const record = JSON.parse(fs.readFileSync(targetPath, "utf8"));
+    console.log(`3AM: LAUNCH.json copied for mint ${record.mint}`);
+  } catch (err) {
+    console.error(`3AM: could not copy ${sourcePath} to ${targetPath}: ${err.message}`);
+    process.exit(1);
+  }
 }
+
+main();
